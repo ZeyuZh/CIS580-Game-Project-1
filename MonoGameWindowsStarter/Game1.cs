@@ -15,14 +15,13 @@ namespace MonoGameWindowsStarter
         SpriteBatch spriteBatch;
         Airplane air;
         List<Enemy> enemies = new List<Enemy>();
-        List<Bullet> bullets = new List<Bullet>();
-        List<EnemyBullet> EBullets = new List<EnemyBullet>();
+        public List<Bullet> bullets = new List<Bullet>();
+        public List<EnemyBullet> EBullets = new List<EnemyBullet>();
         float timer = 2000;
         const float TIMER = 2000;
         bool lose = false;
         Lose loseRect;
         public Random Random = new Random();
-        float enemyTimer = 1000;
 
 
         KeyboardState oldKeyboardState;
@@ -120,17 +119,7 @@ namespace MonoGameWindowsStarter
             // TODO: Add your update logic here
             if (!lose)
             {
-                //shoot
-                if (newKeyboardState.IsKeyDown(Keys.Space) && oldKeyboardState.IsKeyUp(Keys.Space))
-                {
-                    Bullet newBullet = new Bullet(this);
-                    newBullet.LoadContent(Content);
-                    newBullet.Bounds.X = air.Bounds.X + 47;
-                    newBullet.Bounds.Y = air.Bounds.Y - 3;
-                    newBullet.Bounds.Radius = 5;
-                    bullets.Add(newBullet);
-                }
-
+                
                 //remove collised bullet and enemies
                 for (int i = 0; i < bullets.Count; i++)
                 {
@@ -180,25 +169,6 @@ namespace MonoGameWindowsStarter
                     timer = TIMER;
                 }
 
-                
-                //add enemy Bullets Not complete------------------------------------------------------
-                 foreach (Enemy e in enemies)
-                 {
-                    var ran = Random.Next(5);
-                    enemyTimer *= ran;
-                    enemyTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    if (enemyTimer < 0)
-                    {
-                        EnemyBullet eb = new EnemyBullet(this);
-                        eb.LoadContent(Content);
-                        eb.Bounds.X = e.Bounds.X + 50;
-                        eb.Bounds.Y = e.Bounds.Y + e.Bounds.Height + 3;
-                        eb.Bounds.Radius = 5;
-                        EBullets.Add(eb);
-                        enemyTimer = 1000;
-                    }
-                 
-                 }
                  
                 
                  //check for lose

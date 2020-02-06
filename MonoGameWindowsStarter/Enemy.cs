@@ -18,6 +18,7 @@ namespace MonoGameWindowsStarter
 
         Texture2D texture;
 
+        TimeSpan timer = new TimeSpan(0);
 
         public Enemy(Game1 game)
         {
@@ -40,6 +41,18 @@ namespace MonoGameWindowsStarter
         public void Update(GameTime gameTime)
         {
             Bounds.Y += (int)gameTime.TotalGameTime.TotalMinutes + 3;
+            timer += gameTime.ElapsedGameTime;
+
+            if(timer.TotalSeconds > game.Random.Next(1, 5))
+            {
+                EnemyBullet eb = new EnemyBullet(game);
+                eb.LoadContent(game.Content);
+                eb.Bounds.X = Bounds.X + 50;
+                eb.Bounds.Y = Bounds.Y + Bounds.Height + 3;
+                eb.Bounds.Radius = 5;
+                game.EBullets.Add(eb);
+                timer = new TimeSpan(0);
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)

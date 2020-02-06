@@ -26,17 +26,6 @@ namespace MonoGameWindowsStarter
             this.game = game;
         }
 
-        /*public void Initialize()
-        {
-            // Set the bullet's radius
-            Bounds.Radius = 5;
-
-            // position the bullet in the center of the screen
-            Bounds.X = 30;
-            Bounds.Y = 720;
-
-            
-        }*/
 
         public void LoadContent(ContentManager content)
         {

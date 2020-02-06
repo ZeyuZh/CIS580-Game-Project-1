@@ -16,7 +16,8 @@ namespace MonoGameWindowsStarter
 
         public BoundingRectangle Bounds;
 
-       
+        KeyboardState oldKeyboardState;
+        KeyboardState newKeyboardState;
 
         Texture2D texture;
 
@@ -40,17 +41,17 @@ namespace MonoGameWindowsStarter
 
         public void Update(GameTime gameTime)
         {
-            var keyboardState = Keyboard.GetState();
+            newKeyboardState = Keyboard.GetState();
 
             // Move the air left if the up key is pressed
-            if (keyboardState.IsKeyDown(Keys.Left))
+            if (newKeyboardState.IsKeyDown(Keys.Left))
             {
                 // move left
                 Bounds.X -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
             }
 
             // Move the air right if the down key is pressed
-            if (keyboardState.IsKeyDown(Keys.Right))
+            if (newKeyboardState.IsKeyDown(Keys.Right))
             {
                 // move right
                 Bounds.X += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
@@ -65,6 +66,18 @@ namespace MonoGameWindowsStarter
             {
                 Bounds.X = game.GraphicsDevice.Viewport.Width - Bounds.Width;
             }
+
+            //Fire
+            if (newKeyboardState.IsKeyDown(Keys.Space) && oldKeyboardState.IsKeyUp(Keys.Space))
+            {
+                Bullet newBullet = new Bullet(game);
+                newBullet.LoadContent(game.Content);
+                newBullet.Bounds.X = Bounds.X + 47;
+                newBullet.Bounds.Y = Bounds.Y - 3;
+                newBullet.Bounds.Radius = 5;
+                game.bullets.Add(newBullet);
+            }
+            oldKeyboardState = newKeyboardState;
         }
 
         public void Draw(SpriteBatch spriteBatch)
