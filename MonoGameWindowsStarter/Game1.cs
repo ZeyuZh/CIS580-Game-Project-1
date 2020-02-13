@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Audio;
 
 namespace MonoGameWindowsStarter
 {
@@ -22,7 +23,9 @@ namespace MonoGameWindowsStarter
         bool lose = false;
         Lose loseRect;
         public Random Random = new Random();
-
+        SoundEffect expSFX;
+        SpriteFont scoreFont;
+        int socre = 0;
 
         KeyboardState oldKeyboardState;
         KeyboardState newKeyboardState;
@@ -38,6 +41,7 @@ namespace MonoGameWindowsStarter
                 enemies.Add(new Enemy(this));
             }
             loseRect = new Lose(this);
+           
         }
 
         /// <summary>
@@ -59,7 +63,7 @@ namespace MonoGameWindowsStarter
                 bullet.Bounds.Y = air.Bounds.Y - 3;
                 bullet.Bounds.Radius = 5;
             }
-            air.Initialize();
+            //air.Initialize();
             foreach(Enemy e in enemies)
             {
                 e.Initialize();
@@ -79,7 +83,8 @@ namespace MonoGameWindowsStarter
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            expSFX = Content.Load<SoundEffect>("explosion");
+            scoreFont = Content.Load<SpriteFont>("score");
             
             air.LoadContent(Content);
             foreach (Enemy e in enemies)
@@ -127,6 +132,9 @@ namespace MonoGameWindowsStarter
                     {
                         if (!bullets[i].IsExist(enemies[j].Bounds))
                         {
+                            expSFX.Play();
+                            socre++;
+                            //var size = scoreFont.MeasureString("Score: ");
                             enemies.RemoveAt(j);
                             bullets.RemoveAt(i);
                             i--;
@@ -179,13 +187,13 @@ namespace MonoGameWindowsStarter
                     {
                         lose = true;
                     }
-                    if (e.Bounds.CollidesWith(air.Bounds))
+                    if (air.IsCrash(e.Bounds))
                         lose = true;
                     
                 }
                 foreach(EnemyBullet ebs in EBullets)
                 {
-                    if (!ebs.IsExist(air.Bounds))
+                    if (air.IsDestroy(ebs.Bounds))
                     {
                         lose = true;
                     }
@@ -245,7 +253,7 @@ namespace MonoGameWindowsStarter
             {
                 loseRect.Draw(spriteBatch);
             }
-
+            spriteBatch.DrawString(scoreFont, "Score: " + socre, new Vector2(970, 10), Color.Black);
             spriteBatch.End();
             
             base.Draw(gameTime);
