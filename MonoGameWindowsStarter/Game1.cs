@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Audio;
+using System.Linq;
 
 namespace MonoGameWindowsStarter
 {
@@ -14,8 +15,8 @@ namespace MonoGameWindowsStarter
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Airplane air;
-        List<Enemy> enemies = new List<Enemy>();
+        public Player player;
+        public List<Enemy> enemies = new List<Enemy>();
         public List<Bullet> bullets = new List<Bullet>();
         public List<EnemyBullet> EBullets = new List<EnemyBullet>();
         float timer = 2000;
@@ -25,7 +26,11 @@ namespace MonoGameWindowsStarter
         public Random Random = new Random();
         SoundEffect expSFX;
         SpriteFont scoreFont;
-        int socre = 0;
+        public int score = 0;
+
+        SpriteSheet sheet;
+
+        AxisList env;
 
         KeyboardState oldKeyboardState;
         KeyboardState newKeyboardState;
@@ -35,7 +40,7 @@ namespace MonoGameWindowsStarter
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            air = new Airplane(this);
+            //player = new Player(this);
             for (int i = 0; i < 2; i++)
             {
                 enemies.Add(new Enemy(this));
@@ -57,12 +62,7 @@ namespace MonoGameWindowsStarter
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
             
-            foreach(Bullet bullet in bullets)
-            {
-                bullet.Bounds.X = air.Bounds.X;
-                bullet.Bounds.Y = air.Bounds.Y - 3;
-                bullet.Bounds.Radius = 5;
-            }
+            
             //air.Initialize();
             foreach(Enemy e in enemies)
             {
@@ -86,13 +86,32 @@ namespace MonoGameWindowsStarter
             expSFX = Content.Load<SoundEffect>("explosion");
             scoreFont = Content.Load<SpriteFont>("score");
             
-            air.LoadContent(Content);
+            
+
+            var t = Content.Load<Texture2D>("Reimu_1");
+            sheet = new SpriteSheet(t, 50, 73, 0, 0,2);
+
+            var playerFrames = from index in Enumerable.Range(0, 23) select sheet[index];
+            player = new Player(this, playerFrames);
+            player.LoadContent(Content);
+
+            env = new AxisList();
             foreach (Enemy e in enemies)
             {
                 e.LoadContent(Content);
+                env.AddGameObject(e);
             }
             
+            foreach (Enemy e in enemies)
+            {
+                
+            }
+            
+
             loseRect.LoadContent(Content);
+
+            
+           
             
             // TODO: use this.Content to load your game content here
         }
@@ -124,11 +143,20 @@ namespace MonoGameWindowsStarter
             // TODO: Add your update logic here
             if (!lose)
             {
+
+                
                 
                 //remove collised bullet and enemies
                 for (int i = 0; i < bullets.Count; i++)
                 {
-                    for (int j = 0; j < enemies.Count; j++)
+                    var enemyQuery = env.QueryRange(bullets[i].Bounds.X, bullets[i].Bounds.X + bullets[i].Bounds.Width);
+                    if (!bullets[i].IsExist(enemyQuery))
+                    {
+                        score++;
+                        bullets.RemoveAt(i);
+                        return;
+                    }
+                    /*for (int j = 0; j < enemies.Count; j++)
                     {
                         if (!bullets[i].IsExist(enemies[j].Bounds))
                         {
@@ -141,7 +169,7 @@ namespace MonoGameWindowsStarter
                             return;
                         }
 
-                    }
+                    }*/
                 }
 
                 //remove the bullet out of bounds
@@ -187,13 +215,13 @@ namespace MonoGameWindowsStarter
                     {
                         lose = true;
                     }
-                    if (air.IsCrash(e.Bounds))
+                    if (player.Bounds.CollidesWith(e.Bounds))
                         lose = true;
                     
                 }
                 foreach(EnemyBullet ebs in EBullets)
                 {
-                    if (air.IsDestroy(ebs.Bounds))
+                    if (player.Bounds.CollidesWith(ebs.Bounds))
                     {
                         lose = true;
                     }
@@ -209,7 +237,7 @@ namespace MonoGameWindowsStarter
                 {
                     b.Update(gameTime);
                 }
-                air.Update(gameTime);
+                player.Update(gameTime);
                 base.Update(gameTime);
             }
             
@@ -224,6 +252,7 @@ namespace MonoGameWindowsStarter
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+            //GraphicsDevice.Clear(Color.White);
             // TODO: Add your drawing code here
             spriteBatch.Begin();
 
@@ -234,7 +263,7 @@ namespace MonoGameWindowsStarter
             }
             
             //draw airplane
-            air.Draw(spriteBatch);
+            player.Draw(spriteBatch);
 
             //draw enemy bullets
             foreach (EnemyBullet eb in EBullets)
@@ -253,7 +282,7 @@ namespace MonoGameWindowsStarter
             {
                 loseRect.Draw(spriteBatch);
             }
-            spriteBatch.DrawString(scoreFont, "Score: " + socre, new Vector2(970, 10), Color.Black);
+            spriteBatch.DrawString(scoreFont, "Score: " + score, new Vector2(970, 10), Color.Black);
             spriteBatch.End();
             
             base.Draw(gameTime);

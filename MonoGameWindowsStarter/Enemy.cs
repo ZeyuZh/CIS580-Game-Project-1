@@ -10,15 +10,19 @@ using Microsoft.Xna.Framework.Content;
 
 namespace MonoGameWindowsStarter
 {
-    public class Enemy
+    public class Enemy: IBoundable
     {
         Game1 game;
 
-        public BoundingRectangle Bounds;
+       BoundingRectangle bounds;
 
         Texture2D texture;
 
         TimeSpan timer = new TimeSpan(0);
+
+        SpriteSheet bullets_sheet;
+
+        public BoundingRectangle Bounds => bounds;
 
         public Enemy(Game1 game)
         {
@@ -27,32 +31,32 @@ namespace MonoGameWindowsStarter
 
         public void Initialize()
         {
-            Bounds.Width = 100;
-            Bounds.Height = 90;
-            Bounds.X = 100 * game.Random.Next(10);
-            Bounds.Y = 0;
+            bounds.Width = 100;
+            bounds.Height = 90;
+            bounds.X = 100 * game.Random.Next(10);
+            bounds.Y = 0;
         }
 
         public void LoadContent(ContentManager content)
         {
             texture = content.Load<Texture2D>("airplane2");
+            var bullet_t = content.Load<Texture2D>("bullets_1");
+            bullets_sheet = new SpriteSheet(bullet_t, 28, 30, 0, 2, 2);
         }
 
         public void Update(GameTime gameTime)
         {
-            Bounds.Y += (int)gameTime.TotalGameTime.TotalMinutes + 3;
+            
+           /* bounds.Y += (int)gameTime.TotalGameTime.TotalMinutes + 3;
             timer += gameTime.ElapsedGameTime;
 
             if(timer.TotalSeconds > game.Random.Next(1, 5))
             {
-                EnemyBullet eb = new EnemyBullet(game);
-                eb.LoadContent(game.Content);
-                eb.Bounds.X = Bounds.X + 50;
-                eb.Bounds.Y = Bounds.Y + Bounds.Height + 3;
-                eb.Bounds.Radius = 5;
-                game.EBullets.Add(eb);
+                
+                game.EBullets.Add(new EnemyBullet(game, new BoundingRectangle(Bounds.X + 35, Bounds.Y + Bounds.Height + 3, 15, 30), bullets_sheet[33]));
+                
                 timer = new TimeSpan(0);
-            }
+            }*/
         }
 
         public void Draw(SpriteBatch spriteBatch)

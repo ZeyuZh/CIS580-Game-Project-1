@@ -13,37 +13,36 @@ namespace MonoGameWindowsStarter
     public class EnemyBullet
     {
         Game1 game;
+        public BoundingRectangle Bounds;
 
-        Texture2D texture;
+        Sprite sprite;
 
-        public BoundingCircle Bounds;
 
-        const float TIMER = 1000;
-
-        public EnemyBullet(Game1 game)
+        public EnemyBullet(Game1 game, BoundingRectangle bounds, Sprite sprite)
         {
             this.game = game;
+            this.Bounds = bounds;
+            this.sprite = sprite;
+            
         }
 
         
 
-        public void LoadContent(ContentManager content)
+        /*public void LoadContent(ContentManager content)
         {
             texture = content.Load<Texture2D>("circle");
-        }
+        }*/
 
         public void Update(GameTime gameTime)
         {
             
-            var viewport = game.GraphicsDevice.Viewport;
-            var keyboardState = Keyboard.GetState();
             Bounds.Y += 10;
 
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, Bounds, Color.Green);
+            sprite.Draw(spriteBatch, new Vector2(Bounds.X, Bounds.Y), Color.White);
         }
 
         public bool IsExist(BoundingRectangle r)
