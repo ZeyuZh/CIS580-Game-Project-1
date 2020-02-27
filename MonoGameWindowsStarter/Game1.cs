@@ -111,7 +111,7 @@ namespace MonoGameWindowsStarter
             enemies_sheet = new SpriteSheet(t_e, 60, 39, 2, 2, 24);
             for(int i = 0; i < 2; i++)
             {
-                enemies.Add(new Enemy(this, new BoundingRectangle(new Vector2(Random.Next(10) * 100, -10), 60, 39), enemies_sheet[Random.Next(0,15)]));
+                enemies.Add(new Enemy(this, new BoundingRectangle(new Vector2(Random.Next(10) * 100, -30), 60, 39), enemies_sheet[Random.Next(0,15)]));
             }
 
             env = new AxisList();
@@ -203,7 +203,7 @@ namespace MonoGameWindowsStarter
 
                 if (timer < 0 && enemies.Count < 10)
                 {
-                    Enemy newEnemy = new Enemy(this, new BoundingRectangle(new Vector2(Random.Next(10) * 100, -10 - offset.Y), 60, 39), enemies_sheet[Random.Next(0,15)]);
+                    Enemy newEnemy = new Enemy(this, new BoundingRectangle(new Vector2(Random.Next(10) * 100, -30 - offset.Y), 60, 39), enemies_sheet[Random.Next(0,15)]);
                     newEnemy.LoadContent(Content);
                     enemies.Add(newEnemy);
                     env.AddGameObject(newEnemy);
