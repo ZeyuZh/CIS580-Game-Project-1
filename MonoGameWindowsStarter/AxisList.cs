@@ -69,6 +69,14 @@ namespace MonoGameWindowsStarter
             Sort();
         }
 
+        public void RemoveGameObject(IBoundable gameObject)
+        {
+            var box = boxes[gameObject];
+            endPoints.Remove(box.Start);
+            endPoints.Remove(box.End);
+            //boxes[gameObject] = null;
+        }
+
         /// <summary>
         /// Sorts the endpoints array using insertion sort.
         /// This has good performance if the array is nearly sorted

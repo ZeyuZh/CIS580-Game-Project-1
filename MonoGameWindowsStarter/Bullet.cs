@@ -48,7 +48,7 @@ namespace MonoGameWindowsStarter
             {
                 if (Bounds.CollidesWith(enemy.Bounds))
                 {
-                    game.enemies.Remove(enemy);
+                    game.killedEnemies.Add(enemy);
                     return false;
                 }
                 
@@ -57,9 +57,9 @@ namespace MonoGameWindowsStarter
             return true;
         }
 
-        public bool IsVisible()
+        public bool IsVisible(float scrollDistance)
         {
-            if (Bounds.Y < 0)
+            if (Bounds.Y < scrollDistance)
                 return false;
             else
                 return true;

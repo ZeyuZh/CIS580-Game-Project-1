@@ -14,67 +14,58 @@ namespace MonoGameWindowsStarter
     {
         Game1 game;
 
-       BoundingRectangle bounds;
-
-        Texture2D texture;
+        BoundingRectangle bounds;
 
         TimeSpan timer = new TimeSpan(0);
 
         SpriteSheet bullets_sheet;
 
+        Sprite sprite;
+
         public BoundingRectangle Bounds => bounds;
 
-        public Enemy(Game1 game)
+        public Enemy(Game1 game, BoundingRectangle bounds, Sprite sprite)
         {
+            
             this.game = game;
+            this.bounds = bounds;
+            this.sprite = sprite;
         }
 
-        public void Initialize()
-        {
-            bounds.Width = 100;
-            bounds.Height = 90;
-            bounds.X = 100 * game.Random.Next(10);
-            bounds.Y = 0;
-        }
+        
 
         public void LoadContent(ContentManager content)
         {
-            texture = content.Load<Texture2D>("airplane2");
+            
             var bullet_t = content.Load<Texture2D>("bullets_1");
-            bullets_sheet = new SpriteSheet(bullet_t, 28, 30, 0, 2, 2);
+            bullets_sheet = new SpriteSheet(bullet_t, 28, 30, 0, 3, 2);
         }
 
         public void Update(GameTime gameTime)
         {
             
-           /* bounds.Y += (int)gameTime.TotalGameTime.TotalMinutes + 3;
+            bounds.Y += (int)gameTime.TotalGameTime.TotalMinutes;
             timer += gameTime.ElapsedGameTime;
 
             if(timer.TotalSeconds > game.Random.Next(1, 5))
             {
-                
-                game.EBullets.Add(new EnemyBullet(game, new BoundingRectangle(Bounds.X + 35, Bounds.Y + Bounds.Height + 3, 15, 30), bullets_sheet[33]));
+                int b = game.Random.Next(33, 38);
+                game.EBullets.Add(new EnemyBullet(game, new BoundingRectangle(Bounds.X + 22, Bounds.Y + Bounds.Height + 3, 15, 30), bullets_sheet[b]));
                 
                 timer = new TimeSpan(0);
-            }*/
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, Bounds, Color.Blue);
+            sprite.Draw(spriteBatch, new Vector2(Bounds.X, Bounds.Y), Color.White);
         }
 
-        public bool Alive(BoundingCircle c)
-        {
-            if (Bounds.CollidesWith(c))
-                return false;
-            else
-                return true;
-        }
+        
 
-        public bool IsLose()
+        public bool IsLose(float scrollDistance)
         {
-            if (Bounds.Y > game.GraphicsDevice.Viewport.Height)
+            if (Bounds.Y > game.GraphicsDevice.Viewport.Height + scrollDistance)
                 return true;
             else
                 return false;

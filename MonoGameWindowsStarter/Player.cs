@@ -41,7 +41,7 @@ namespace MonoGameWindowsStarter
         const int FRAME_WIDTH = 50;
         const int FRAME_HEIGHT = 73;
         
-        Vector2 position = new Vector2(521,679);
+        public Vector2 position = new Vector2(521,679);
 
         State state = State.Idle;
         TimeSpan timer;
@@ -69,10 +69,10 @@ namespace MonoGameWindowsStarter
             //texture = content.Load<Texture2D>("Reimu_1");
             //shootSFX = content.Load<SoundEffect>("shooting");
             var bullet_t = content.Load<Texture2D>("bullets_1");
-            bullets_sheet = new SpriteSheet(bullet_t, 28, 30, 0, 2, 2);
+            bullets_sheet = new SpriteSheet(bullet_t, 28, 30, 0, 3, 2);
         }
 
-        public void Update(GameTime gameTime)
+        public void Update(GameTime gameTime, float scrollDistance)
         {
             newKeyboardState = Keyboard.GetState();
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -145,33 +145,27 @@ namespace MonoGameWindowsStarter
             }
 
             // Stop the paddle from going off-screen
-            if (position.X < 0)
+            if (position.X < 3)
             {
-                position.X = 0;
+                position.X = 3;
             }
             else if (position.X > game.GraphicsDevice.Viewport.Width - 50)
             {
                 position.X = game.GraphicsDevice.Viewport.Width - 50;
             }
-            else if (position.Y > game.GraphicsDevice.Viewport.Height - 70)
+            else if (position.Y > game.GraphicsDevice.Viewport.Height - 70 + scrollDistance)
             {
-                position.Y = game.GraphicsDevice.Viewport.Height - 70;
+                position.Y = game.GraphicsDevice.Viewport.Height - 70 + scrollDistance;
             }
-            else if(position.Y < 0)
+            else if(position.Y < scrollDistance)
             {
-                position.Y = 0;
+                position.Y = scrollDistance;
             }
 
             //Fire
             if (newKeyboardState.IsKeyDown(Keys.Space) && oldKeyboardState.IsKeyUp(Keys.Space))
             {
-                /*Bullet newBullet = new Bullet(game);
-                newBullet.LoadContent(game.Content);
-                newBullet.Bounds.X = position.X + 47;
-                newBullet.Bounds.Y = position.Y - 3;
-                newBullet.Bounds.Radius = 5;
-                game.bullets.Add(newBullet);*/
-
+               
                 game.bullets.Add(new Bullet(game,new BoundingRectangle(Bounds.X, Bounds.Y-3,15,30),bullets_sheet[25]));
                 //shootSFX.Play();
                 

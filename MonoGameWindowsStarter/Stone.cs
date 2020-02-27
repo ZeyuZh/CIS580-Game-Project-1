@@ -6,52 +6,33 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Input;
 
 namespace MonoGameWindowsStarter
 {
-    public class EnemyBullet
+    public class Stone
     {
         Game1 game;
-
         public BoundingRectangle Bounds;
 
         Sprite sprite;
 
-
-        public EnemyBullet(Game1 game, BoundingRectangle bounds, Sprite sprite)
+        public Stone(Game1 game, BoundingRectangle bounds, Sprite sprite)
         {
             this.game = game;
+
             this.Bounds = bounds;
             this.sprite = sprite;
-            
+
         }
-
-        
-
-        /*public void LoadContent(ContentManager content)
-        {
-            texture = content.Load<Texture2D>("circle");
-        }*/
 
         public void Update(GameTime gameTime)
         {
-            
-            Bounds.Y += 5;
-
+            Bounds.Y += 3;
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             sprite.Draw(spriteBatch, new Vector2(Bounds.X, Bounds.Y), Color.White);
-        }
-
-        public bool IsExist(BoundingRectangle r)
-        {
-            if (Bounds.CollidesWith(r))
-                return false;
-            else
-                return true;
         }
 
         public bool IsVisible(float scrollDistance)
@@ -61,6 +42,12 @@ namespace MonoGameWindowsStarter
             else
                 return true;
         }
+
+        public bool IsCrash(BoundingRectangle player)
+        {
+            if (Bounds.CollidesWith(player))
+                return true;
+            else return false;
+        }
     }
 }
-

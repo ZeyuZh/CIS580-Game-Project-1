@@ -17,6 +17,7 @@ namespace MonoGameWindowsStarter
         SpriteBatch spriteBatch;
         public Player player;
         public List<Enemy> enemies = new List<Enemy>();
+        public List<Enemy> killedEnemies = new List<Enemy>();
         public List<Bullet> bullets = new List<Bullet>();
         public List<EnemyBullet> EBullets = new List<EnemyBullet>();
         float timer = 2000;
@@ -28,23 +29,25 @@ namespace MonoGameWindowsStarter
         SpriteFont scoreFont;
         public int score = 0;
 
+        public List<Stone> stones = new List<Stone>();
+        SpriteSheet stone_sheet;
+
         SpriteSheet sheet;
+        SpriteSheet enemies_sheet;
 
         AxisList env;
 
         KeyboardState oldKeyboardState;
         KeyboardState newKeyboardState;
 
+        Vector2 offset;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            //player = new Player(this);
-            for (int i = 0; i < 2; i++)
-            {
-                enemies.Add(new Enemy(this));
-            }
+            
             loseRect = new Lose(this);
            
         }
@@ -64,10 +67,10 @@ namespace MonoGameWindowsStarter
             
             
             //air.Initialize();
-            foreach(Enemy e in enemies)
+            /*foreach(Enemy e in enemies)
             {
                 e.Initialize();
-            }
+            }*/
             
             loseRect.Initialize();
             
@@ -87,13 +90,29 @@ namespace MonoGameWindowsStarter
             scoreFont = Content.Load<SpriteFont>("score");
             
             
-
+            //load player
             var t = Content.Load<Texture2D>("Reimu_1");
             sheet = new SpriteSheet(t, 50, 73, 0, 0,2);
+
+            //load stone
+            var t_s = Content.Load<Texture2D>("stones");
+            stone_sheet = new SpriteSheet(t_s, 42, 40, 1, 2, 0);
+            for(int i = 0; i < 10; i++)
+            {
+                stones.Add(new Stone(this, new BoundingRectangle(new Vector2(Random.Next(10) * 100, -Random.Next(100) * 1000), 42, 40),stone_sheet[Random.Next(0,1)]));
+            }
 
             var playerFrames = from index in Enumerable.Range(0, 23) select sheet[index];
             player = new Player(this, playerFrames);
             player.LoadContent(Content);
+
+
+            var t_e = Content.Load<Texture2D>("Enemies_1");
+            enemies_sheet = new SpriteSheet(t_e, 60, 39, 2, 2, 24);
+            for(int i = 0; i < 2; i++)
+            {
+                enemies.Add(new Enemy(this, new BoundingRectangle(new Vector2(Random.Next(10) * 100, -10), 60, 39), enemies_sheet[Random.Next(0,15)]));
+            }
 
             env = new AxisList();
             foreach (Enemy e in enemies)
@@ -102,17 +121,8 @@ namespace MonoGameWindowsStarter
                 env.AddGameObject(e);
             }
             
-            foreach (Enemy e in enemies)
-            {
-                
-            }
-            
-
             loseRect.LoadContent(Content);
 
-            
-           
-            
             // TODO: use this.Content to load your game content here
         }
 
@@ -132,7 +142,7 @@ namespace MonoGameWindowsStarter
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            
+            offset = new Vector2(0, 0) + new Vector2(0, (float)gameTime.TotalGameTime.TotalMilliseconds / 50);
             newKeyboardState = Keyboard.GetState();
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
@@ -143,39 +153,23 @@ namespace MonoGameWindowsStarter
             // TODO: Add your update logic here
             if (!lose)
             {
-
-                
-                
                 //remove collised bullet and enemies
                 for (int i = 0; i < bullets.Count; i++)
                 {
-                    var enemyQuery = env.QueryRange(bullets[i].Bounds.X, bullets[i].Bounds.X + bullets[i].Bounds.Width);
+                    var enemyQuery = env.QueryRange(0, 1042);
                     if (!bullets[i].IsExist(enemyQuery))
                     {
                         score++;
                         bullets.RemoveAt(i);
                         return;
                     }
-                    /*for (int j = 0; j < enemies.Count; j++)
-                    {
-                        if (!bullets[i].IsExist(enemies[j].Bounds))
-                        {
-                            expSFX.Play();
-                            socre++;
-                            //var size = scoreFont.MeasureString("Score: ");
-                            enemies.RemoveAt(j);
-                            bullets.RemoveAt(i);
-                            i--;
-                            return;
-                        }
-
-                    }*/
+                    
                 }
 
                 //remove the bullet out of bounds
                 for (int i = 0; i < bullets.Count; i++)
                 {
-                    if (!bullets[i].IsVisible())
+                    if (!bullets[i].IsVisible(-offset.Y))
                     {
                         bullets.RemoveAt(i);
                         i--;
@@ -184,24 +178,35 @@ namespace MonoGameWindowsStarter
                 }
                 for (int i = 0; i < EBullets.Count; i++)
                 {
-                    if (!EBullets[i].IsVisible())
+                    if (!EBullets[i].IsVisible(-offset.Y))
                     {
                         EBullets.RemoveAt(i);
                         i--;
                     }
 
                 }
-                
+
+                //remove stones out of bounds
+                for (int i = 0; i < stones.Count; i++)
+                {
+                    if (!stones[i].IsVisible(-offset.Y))
+                    {
+                        stones.RemoveAt(i);
+                        i--;
+                    }
+
+                }
+
                 //add enemies
                 float elapsed = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
                 timer -= elapsed;
 
                 if (timer < 0 && enemies.Count < 10)
                 {
-                    Enemy newEnemy = new Enemy(this);
+                    Enemy newEnemy = new Enemy(this, new BoundingRectangle(new Vector2(Random.Next(10) * 100, -10 - offset.Y), 60, 39), enemies_sheet[Random.Next(0,15)]);
                     newEnemy.LoadContent(Content);
-                    newEnemy.Initialize();
                     enemies.Add(newEnemy);
+                    env.AddGameObject(newEnemy);
                     timer = TIMER;
                 }
 
@@ -211,7 +216,7 @@ namespace MonoGameWindowsStarter
                 foreach (Enemy e in enemies)
                 {
                     e.Update(gameTime);
-                    if (e.IsLose())
+                    if (e.IsLose(-offset.Y))
                     {
                         lose = true;
                     }
@@ -227,6 +232,12 @@ namespace MonoGameWindowsStarter
                     }
                 }
                 
+                foreach(Stone s in stones)
+                {
+                    s.Update(gameTime);
+                    if (s.IsCrash(player.Bounds))
+                        lose = true;
+                }
                
                 //update
                 foreach (EnemyBullet ebs in EBullets)
@@ -237,8 +248,18 @@ namespace MonoGameWindowsStarter
                 {
                     b.Update(gameTime);
                 }
-                player.Update(gameTime);
+
+                
+                    
+                player.Update(gameTime, -offset.Y);
                 base.Update(gameTime);
+
+                // Remove killed enemies 
+                foreach (Enemy enemy in killedEnemies)
+                {
+                    enemies.Remove(enemy);
+                    env.RemoveGameObject(enemy);
+                }
             }
             
             oldKeyboardState = newKeyboardState;
@@ -252,17 +273,18 @@ namespace MonoGameWindowsStarter
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            //GraphicsDevice.Clear(Color.White);
             // TODO: Add your drawing code here
-            spriteBatch.Begin();
 
+            var t = Matrix.CreateTranslation(offset.X, offset.Y, 0);
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, t);
+            
             //draw bullets
             foreach (Bullet b in bullets)
             {
                 b.Draw(spriteBatch);
             }
             
-            //draw airplane
+            //draw player
             player.Draw(spriteBatch);
 
             //draw enemy bullets
@@ -277,14 +299,25 @@ namespace MonoGameWindowsStarter
                 e.Draw(spriteBatch);
             }
 
+            foreach(Stone s in stones)
+            {
+                s.Draw(spriteBatch);
+            }
+
+            
+            spriteBatch.End();
+
+            spriteBatch.Begin();
+
             //draw lose picture
             if (lose)
             {
                 loseRect.Draw(spriteBatch);
             }
-            spriteBatch.DrawString(scoreFont, "Score: " + score, new Vector2(970, 10), Color.Black);
+            string status = "Score: " + score + "\nEnemies: " + enemies.Count;
+            spriteBatch.DrawString(scoreFont, status, new Vector2(956, 10), Color.Black);
             spriteBatch.End();
-            
+
             base.Draw(gameTime);
         }
     }
